@@ -127,7 +127,7 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 	}
 
 	rw.Header().Set("Content-type", "application/json")
-	if err := json.NewEncoder(rw).Encode(receiveMetrics); err != nil {
+	if err := json.NewEncoder(rw).Encode(currentMetrics); err != nil {
 		http.Error(rw, "encode: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
