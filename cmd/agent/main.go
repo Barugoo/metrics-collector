@@ -203,6 +203,7 @@ func (agent *Agent) SendJSONMetrics() error {
 			//continue
 			return err
 		}
+		defer response.Body.Close()
 
 		answer, err := io.ReadAll(response.Body)
 		if err != nil {
