@@ -113,7 +113,11 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 		return
 	}
 	if errors.Is(err, store.ErrNotFound) {
-		handler.metricsStorage.AddMetrics(receiveMetrics.ID, receiveMetrics)
+		if err := handler.metricsStorage.AddMetrics(receiveMetrics.ID, receiveMetrics); err != nil {
+			log.Println("Error add new metrics to storage", err)
+			http.Error(rw, "error add new metrics to storage", http.StatusInternalServerError)
+			return
+		}
 		rw.Header().Set("Content-type", "application/json")
 		if err := json.NewEncoder(rw).Encode(receiveMetrics); err != nil {
 			http.Error(rw, "encode: "+err.Error(), http.StatusInternalServerError)
