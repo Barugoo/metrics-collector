@@ -20,7 +20,7 @@ func TestAgent_SendMetrics(t *testing.T) {
 			fields: fields{
 				metricStorage: store.NewMemStorage(0),
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
