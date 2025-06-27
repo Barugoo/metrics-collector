@@ -112,14 +112,8 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 		return
 	}
 
-	resp, err := json.Marshal(receiveMetrics)
-	if err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-	rw.Write(resp)
+	rw.Header().Set("Content-type", "application/json")
+	json.NewEncoder(rw).Encode(receiveMetrics)
 }
 
 func (handler *MetricsHandler) getJSONMetrics(rw http.ResponseWriter, request *http.Request) {
