@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,11 +32,6 @@ func (handler *MetricsHandler) receiveMetricsHandler(rw http.ResponseWriter, req
 	metricsName := chi.URLParam(request, "metricsName")
 	metricsValue := chi.URLParam(request, "metricsValue")
 
-	//for testing 3 iteration add test metrics name in storage
-	if strings.Contains(metricsName, "testSetGet") {
-		handler.metricsStorage.AddMetrics(metricsName, models.Metrics{MType: metricsType})
-	}
-
 	if strings.Compare(metricsType, models.Counter) != 0 && strings.Compare(metricsType, models.Gauge) != 0 {
 		http.Error(rw, "Wrong metrics type", http.StatusBadRequest)
 		return
@@ -46,8 +42,36 @@ func (handler *MetricsHandler) receiveMetricsHandler(rw http.ResponseWriter, req
 		return
 	}
 	currentMetrics, err := handler.metricsStorage.GetMetrics(metricsName)
-	if err != nil {
-		http.Error(rw, "metrics not found", http.StatusBadRequest)
+	if err != nil && !errors.Is(err, store.ErrNotFound) {
+		http.Error(rw, "error get metrics from storage", http.StatusInternalServerError)
+		return
+	}
+	if errors.Is(err, store.ErrNotFound) {
+		m := models.Metrics{
+			ID:    metricsName,
+			MType: metricsType,
+		}
+		if metricsType == models.Counter {
+			delta, err := strconv.ParseInt(metricsValue, 10, 64)
+			if err != nil {
+				http.Error(rw, "error convert metrics value to int", http.StatusBadRequest)
+				return
+			}
+			m.Delta = &delta
+		} else if metricsType == models.Gauge {
+			value, err := strconv.ParseFloat(metricsValue, 64)
+			if err != nil {
+				http.Error(rw, "error convert metrics value to float", http.StatusBadRequest)
+				return
+			}
+			m.Value = &value
+		}
+		if err := handler.metricsStorage.AddMetrics(metricsName, m); err != nil {
+			http.Error(rw, "error add new metrics to storage", http.StatusInternalServerError)
+			return
+		}
+		rw.Header().Set("Content-type", "text/plain")
+		rw.WriteHeader(http.StatusOK)
 		return
 	}
 	if err := currentMetrics.SetMetricsValue(metricsValue); err != nil {
