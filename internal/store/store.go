@@ -70,7 +70,9 @@ func (inMemmory *MemStorage) GetMetrics(metricsName string) (models.Metrics, err
 	inMemmory.mu.Lock()
 	defer inMemmory.mu.Unlock()
 
-	log.Println("Get metrics ", inMemmory.storage)
+	for name, metrics := range inMemmory.storage {
+		log.Printf("GetMetrics: %s - %s\n", name, metrics.GetMetricsValue())
+	}
 	metrics, ok := inMemmory.storage[metricsName]
 	if !ok {
 		metrics = models.Metrics{}
@@ -90,8 +92,6 @@ func Safe[T any](v *T) T {
 func (inMemmory *MemStorage) UpdateMetrics(metricsName string, metricsValue models.Metrics) error {
 	inMemmory.mu.Lock()
 	defer inMemmory.mu.Unlock()
-
-	log.Println(metricsName, Safe(metricsValue.Delta), Safe(metricsValue.Value))
 
 	_, ok := inMemmory.storage[metricsName]
 	if !ok {
