@@ -12,6 +12,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"slices"
 	"strconv"
 	"time"
 
@@ -76,9 +77,14 @@ func (agent *Agent) UpdateMetrics() error {
 
 	for _, name := range append(models.CounterMetricsNames, models.GaugeMetricsNames...) {
 		currentMetrics, err := agent.metricStorage.GetMetrics(name)
-		if err != nil {
+		if err != nil && !errors.Is(err, store.ErrNotFound) {
 			fmt.Printf("Error get current value metrics for name %s\n", name)
 			return err
+		}
+		currentMetrics.ID = name
+		currentMetrics.MType = models.Gauge
+		if slices.Contains(models.CounterMetricsNames, name) {
+			currentMetrics.MType = models.Counter
 		}
 
 		switch currentMetrics.MType {
