@@ -8,7 +8,7 @@ import (
 
 func TestAgent_SendMetrics(t *testing.T) {
 	type fields struct {
-		metricStorage store.MemStorage
+		metricStorage store.Storage
 	}
 	tests := []struct {
 		name    string

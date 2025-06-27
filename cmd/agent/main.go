@@ -20,7 +20,7 @@ import (
 )
 
 type Agent struct {
-	metricStorage store.MemStorage
+	metricStorage store.Storage
 	config        AgentConfig
 }
 
@@ -250,7 +250,9 @@ func (agent *Agent) MainLoop() error {
 }
 
 func main() {
-	agent := Agent{}
+	agent := Agent{
+		metricStorage: store.NewMemStorage(),
+	}
 	agentFlags := flag.NewFlagSet("Agent flags", flag.ExitOnError)
 	agentFlags.StringVar(&agent.config.serverAddress, "a", "localhost:8080", "adress for start server in form ip:port. default localhost:8080")
 	agentFlags.UintVar(&agent.config.reportInterval, "r", 10, "report interval in seconds. default 10.")
