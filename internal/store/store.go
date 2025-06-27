@@ -91,7 +91,7 @@ func (inMemmory *MemStorage) UpdateMetrics(metricsName string, metricsValue mode
 	inMemmory.mu.Lock()
 	defer inMemmory.mu.Unlock()
 
-	log.Println(Safe(metricsValue.Delta), Safe(metricsValue.Value))
+	log.Println(metricsName, Safe(metricsValue.Delta), Safe(metricsValue.Value))
 
 	_, ok := inMemmory.storage[metricsName]
 	if !ok {
