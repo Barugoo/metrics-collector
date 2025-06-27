@@ -18,7 +18,7 @@ import (
 )
 
 type MetricsHandler struct {
-	metricsStorage store.MemStorage
+	metricsStorage store.Storage
 	sugar          zap.SugaredLogger
 }
 
@@ -191,7 +191,9 @@ func (handler *MetricsHandler) requestLogger(h http.Handler) http.Handler {
 }
 
 func MetricRouter() chi.Router {
-	handler := MetricsHandler{}
+	handler := MetricsHandler{
+		metricsStorage: store.NewMemStorage(),
+	}
 	handler.metricsStorage.InitializeStorage()
 
 	logger, err := zap.NewDevelopment()

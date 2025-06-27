@@ -3,13 +3,14 @@ package store
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/skdiver33/metrics-collector/models"
 )
 
 type MemStorage struct {
 	storage map[string]models.Metrics
-	//mu      sync.RWMutex
+	mu      *sync.RWMutex
 }
 
 type Storage interface {
@@ -17,7 +18,14 @@ type Storage interface {
 	AddMetrics(metricsName string, metricsValue models.Metrics) error
 	UpdateMetrics(metricsName string, metricsValue models.Metrics) error
 	GetMetrics(metricsName string) (models.Metrics, error)
-	GetAllMetricsNames() []string
+	GetAllMetricsNames() ([]string, error)
+}
+
+func NewMemStorage() Storage {
+	return &MemStorage{
+		storage: make(map[string]models.Metrics),
+		mu:      &sync.RWMutex{},
+	}
 }
 
 func (inMemmory *MemStorage) InitializeStorage() error {
