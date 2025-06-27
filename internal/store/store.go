@@ -3,6 +3,7 @@ package store
 import (
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/skdiver33/metrics-collector/models"
@@ -81,6 +82,8 @@ func (inMemmory *MemStorage) GetMetrics(metricsName string) (models.Metrics, err
 func (inMemmory *MemStorage) UpdateMetrics(metricsName string, metricsValue models.Metrics) error {
 	inMemmory.mu.Lock()
 	defer inMemmory.mu.Unlock()
+
+	log.Println(metricsValue)
 
 	_, ok := inMemmory.storage[metricsName]
 	if !ok {
