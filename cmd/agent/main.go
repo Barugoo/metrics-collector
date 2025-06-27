@@ -187,9 +187,8 @@ func (agent *Agent) SendJSONMetrics() error {
 			return errors.New("error! json marshaling")
 		}
 		fmt.Println("Send data ", string(buf))
-		requestBody := bytes.NewBuffer(buf)
 
-		req, err := http.NewRequest("POST", "http://"+agent.config.serverAddress+"/update/", requestBody)
+		req, err := http.NewRequest("POST", "http://"+agent.config.serverAddress+"/update/", bytes.NewReader(buf))
 		if err != nil {
 			return errors.New("error! create request")
 		}
