@@ -102,13 +102,26 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 		http.Error(rw, "not all metrics data defined!", http.StatusNotFound)
 		return
 	}
-	_, err := handler.metricsStorage.GetMetrics(receiveMetrics.ID)
+
+	currentMetrics, err := handler.metricsStorage.GetMetrics(receiveMetrics.ID)
 	if err != nil {
 		http.Error(rw, "metrics not found", http.StatusBadRequest)
 		return
 	}
 
-	if err := handler.metricsStorage.UpdateMetrics(receiveMetrics.ID, receiveMetrics); err != nil {
+	var metricsValue string
+	if receiveMetrics.MType == models.Counter {
+		metricsValue = fmt.Sprintf("%d", *receiveMetrics.Delta)
+	} else if receiveMetrics.MType == models.Gauge {
+		metricsValue = fmt.Sprintf("%f", *receiveMetrics.Value)
+	}
+
+	if err := currentMetrics.SetMetricsValue(metricsValue); err != nil {
+		http.Error(rw, "error set up new value in metrics", http.StatusBadRequest)
+		return
+	}
+
+	if err := handler.metricsStorage.UpdateMetrics(receiveMetrics.ID, currentMetrics); err != nil {
 		http.Error(rw, "error update metrics on server", http.StatusInternalServerError)
 		return
 	}
