@@ -12,6 +12,7 @@ import (
 type MemStorage struct {
 	storage map[string]models.Metrics
 	mu      *sync.RWMutex
+	ts      int64 // timestamp for metrics, used for testing purposes
 }
 
 type Storage interface {
@@ -22,10 +23,11 @@ type Storage interface {
 	GetAllMetricsNames() ([]string, error)
 }
 
-func NewMemStorage() Storage {
+func NewMemStorage(ts int64) Storage {
 	return &MemStorage{
 		storage: make(map[string]models.Metrics),
 		mu:      &sync.RWMutex{},
+		ts:      ts,
 	}
 }
 
@@ -70,9 +72,6 @@ func (inMemmory *MemStorage) GetMetrics(metricsName string) (models.Metrics, err
 	inMemmory.mu.Lock()
 	defer inMemmory.mu.Unlock()
 
-	for name, metrics := range inMemmory.storage {
-		log.Printf("GetMetrics: %s - %s\n", name, metrics.GetMetricsValue())
-	}
 	metrics, ok := inMemmory.storage[metricsName]
 	if !ok {
 		metrics = models.Metrics{}
@@ -99,6 +98,8 @@ func (inMemmory *MemStorage) UpdateMetrics(metricsName string, metricsValue mode
 		return errors.New(message)
 	}
 
+	log.Printf("%d Update metrics %s, type: %s, value: %.6f, delta: %d",
+		inMemmory.ts, metricsName, metricsValue.MType, Safe(metricsValue.Value), Safe(metricsValue.Delta))
 	inMemmory.storage[metricsName] = metricsValue
 	return nil
 }
