@@ -70,13 +70,13 @@ func (inMemmory *MemStorage) GetMetrics(metricsName string) (models.Metrics, err
 	inMemmory.mu.Lock()
 	defer inMemmory.mu.Unlock()
 
+	log.Println("Get metrics ", inMemmory.storage)
 	metrics, ok := inMemmory.storage[metricsName]
 	if !ok {
 		metrics = models.Metrics{}
 		return metrics, errors.New("metrics with name not found")
 	}
 	return metrics, nil
-
 }
 
 func Safe[T any](v *T) T {
