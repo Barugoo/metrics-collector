@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -106,10 +107,18 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 	}
 
 	currentMetrics, err := handler.metricsStorage.GetMetrics(receiveMetrics.ID)
-	if err != nil {
-		log.Println("Metrics not found", receiveMetrics.ID)
-		http.Error(rw, "metrics not found", http.StatusBadRequest)
+	if err != nil && !errors.Is(err, store.ErrNotFound) {
+		log.Println("Error get metrics from storage", err)
+		http.Error(rw, "error get metrics from storage", http.StatusInternalServerError)
 		return
+	}
+	if errors.Is(err, store.ErrNotFound) {
+		handler.metricsStorage.AddMetrics(receiveMetrics.ID, receiveMetrics)
+		rw.Header().Set("Content-type", "application/json")
+		if err := json.NewEncoder(rw).Encode(receiveMetrics); err != nil {
+			http.Error(rw, "encode: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	var metricsValue string
@@ -210,7 +219,6 @@ func MetricRouter() chi.Router {
 	handler := MetricsHandler{
 		metricsStorage: store.NewMemStorage(ts),
 	}
-	handler.metricsStorage.InitializeStorage()
 
 	logger, err := zap.NewDevelopment()
 	if err != nil {
