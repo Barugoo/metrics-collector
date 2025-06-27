@@ -201,6 +201,7 @@ func MetricRouter() chi.Router {
 	defer logger.Sync()
 	handler.sugar = *logger.Sugar()
 	r := chi.NewRouter()
+	r.Use(PanicMiddleware)
 
 	//r.Use(handler.requestLogger)
 	r.Route("/", func(r chi.Router) {
@@ -232,4 +233,15 @@ func main() {
 		panic(err.Error())
 	}
 
+}
+
+func PanicMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), http.StatusInternalServerError)
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
 }
