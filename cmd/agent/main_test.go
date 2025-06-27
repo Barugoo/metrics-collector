@@ -29,7 +29,6 @@ func TestAgent_SendMetrics(t *testing.T) {
 				metricStorage: tt.fields.metricStorage,
 				config:        AgentConfig{serverAddress: "localhost:8080", pollInterval: 2, reportInterval: 10},
 			}
-			agent.metricStorage.InitializeStorage()
 			agent.UpdateMetrics()
 			if err := agent.SendMetrics(); (err != nil) != tt.wantErr {
 				t.Errorf("Agent.SendMetrics() error = %v, wantErr %v", err, tt.wantErr)

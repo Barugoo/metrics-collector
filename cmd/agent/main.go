@@ -221,10 +221,6 @@ func (agent *Agent) SendJSONMetrics() error {
 
 func (agent *Agent) MainLoop() error {
 
-	if err := agent.metricStorage.InitializeStorage(); err != nil {
-		return err
-	}
-
 	min := min(agent.config.reportInterval, agent.config.pollInterval)
 	reportPeriod := agent.config.reportInterval / min
 	pollPeriod := agent.config.pollInterval / min

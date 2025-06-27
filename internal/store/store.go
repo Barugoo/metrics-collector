@@ -16,12 +16,13 @@ type MemStorage struct {
 }
 
 type Storage interface {
-	InitializeStorage() error
 	AddMetrics(metricsName string, metricsValue models.Metrics) error
 	UpdateMetrics(metricsName string, metricsValue models.Metrics) error
 	GetMetrics(metricsName string) (models.Metrics, error)
 	GetAllMetricsNames() ([]string, error)
 }
+
+var ErrNotFound = errors.New("metrics not found")
 
 func NewMemStorage(ts int64) Storage {
 	return &MemStorage{
@@ -29,28 +30,6 @@ func NewMemStorage(ts int64) Storage {
 		mu:      &sync.RWMutex{},
 		ts:      ts,
 	}
-}
-
-func (inMemmory *MemStorage) InitializeStorage() error {
-
-	inMemmory.storage = make(map[string]models.Metrics)
-	for _, metricsName := range models.GaugeMetricsNames {
-		val := 0.0
-		metrics := models.Metrics{ID: metricsName, MType: models.Gauge, Value: &val}
-		if err := inMemmory.AddMetrics(metricsName, metrics); err != nil {
-			fmt.Println("Error initialize storage.")
-			return err
-		}
-	}
-	for _, metricsName := range models.CounterMetricsNames {
-		delta := int64(0)
-		metrics := models.Metrics{ID: metricsName, MType: models.Counter, Delta: &delta}
-		if err := inMemmory.AddMetrics(metricsName, metrics); err != nil {
-			fmt.Println("Error initialize storage.")
-			return err
-		}
-	}
-	return nil
 }
 
 func (inMemmory *MemStorage) AddMetrics(metricsName string, metricsValue models.Metrics) error {
@@ -75,7 +54,7 @@ func (inMemmory *MemStorage) GetMetrics(metricsName string) (models.Metrics, err
 	metrics, ok := inMemmory.storage[metricsName]
 	if !ok {
 		metrics = models.Metrics{}
-		return metrics, errors.New("metrics with name not found")
+		return metrics, fmt.Errorf("%s: %w", metricsName, ErrNotFound)
 	}
 	return metrics, nil
 }
