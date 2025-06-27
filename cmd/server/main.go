@@ -84,7 +84,7 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 
 	receiveMetrics := models.Metrics{}
 	if err := json.NewDecoder(request.Body).Decode(&receiveMetrics); err != nil {
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		http.Error(rw, "decode: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -114,14 +114,17 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 	}
 
 	rw.Header().Set("Content-type", "application/json")
-	json.NewEncoder(rw).Encode(receiveMetrics)
+	if err := json.NewEncoder(rw).Encode(receiveMetrics); err != nil {
+		http.Error(rw, "encode: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (handler *MetricsHandler) getJSONMetrics(rw http.ResponseWriter, request *http.Request) {
 
 	receiveMetrics := models.Metrics{}
 	if err := json.NewDecoder(request.Body).Decode(&receiveMetrics); err != nil {
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		http.Error(rw, "decode: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	//fmt.Println(receiveMetrics)
@@ -137,8 +140,11 @@ func (handler *MetricsHandler) getJSONMetrics(rw http.ResponseWriter, request *h
 		return
 	}
 
-	rw.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(rw).Encode(response)
+	rw.Header().Set("Content-type", "application/json")
+	if err := json.NewEncoder(rw).Encode(response); err != nil {
+		http.Error(rw, "encode: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (handler *MetricsHandler) metricsInfoHandler(rw http.ResponseWriter, request *http.Request) {
