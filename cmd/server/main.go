@@ -93,18 +93,21 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 	// 	handler.metricsStorage.AddMetrics(receiveMetrics.ID, models.Metrics{ID: receiveMetrics.ID, MType: receiveMetrics.MType})
 	// }
 
-	if strings.Compare(receiveMetrics.MType, models.Counter) != 0 && strings.Compare(receiveMetrics.MType, models.Gauge) != 0 {
+	if receiveMetrics.MType != models.Counter && receiveMetrics.MType != models.Gauge {
+		log.Println("Wrong metrics type", receiveMetrics.MType)
 		http.Error(rw, "Wrong metrics type", http.StatusBadRequest)
 		return
 	}
 
 	if receiveMetrics.ID == "" {
+		log.Println("Not all metrics data defined!")
 		http.Error(rw, "not all metrics data defined!", http.StatusNotFound)
 		return
 	}
 
 	currentMetrics, err := handler.metricsStorage.GetMetrics(receiveMetrics.ID)
 	if err != nil {
+		log.Println("Metrics not found", receiveMetrics.ID)
 		http.Error(rw, "metrics not found", http.StatusBadRequest)
 		return
 	}
@@ -117,6 +120,7 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 	}
 
 	if err := currentMetrics.SetMetricsValue(metricsValue); err != nil {
+		log.Println("Error set up new value in metrics", err)
 		http.Error(rw, "error set up new value in metrics", http.StatusBadRequest)
 		return
 	}
