@@ -73,11 +73,8 @@ func (agent *Agent) UpdateMetrics() error {
 	memStat := runtime.MemStats{}
 	runtime.ReadMemStats(&memStat)
 	value := reflect.ValueOf(memStat)
-	allMetricsName, err := agent.metricStorage.GetAllMetricsNames()
-	if err != nil {
-		return err
-	}
-	for _, name := range allMetricsName {
+
+	for _, name := range append(models.CounterMetricsNames, models.GaugeMetricsNames...) {
 		currentMetrics, err := agent.metricStorage.GetMetrics(name)
 		if err != nil {
 			fmt.Printf("Error get current value metrics for name %s\n", name)

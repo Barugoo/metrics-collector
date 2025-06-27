@@ -87,13 +87,10 @@ func (inMemmory *MemStorage) GetAllMetricsNames() ([]string, error) {
 	inMemmory.mu.Lock()
 	defer inMemmory.mu.Unlock()
 
-	allMetricsNames := make([]string, 0)
-	for metricsName := range inMemmory.storage {
-		allMetricsNames = append(allMetricsNames, metricsName)
+	var allMetricsName []string
+	for name := range inMemmory.storage {
+		allMetricsName = append(allMetricsName, name)
+	}
+	return allMetricsName, nil
 
-	}
-	if len(allMetricsNames) == 0 {
-		return allMetricsNames, errors.New("empty storage! initialize before use")
-	}
-	return allMetricsNames, nil
 }
