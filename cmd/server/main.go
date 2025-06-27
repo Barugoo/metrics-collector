@@ -119,6 +119,7 @@ func (handler *MetricsHandler) receiveJSONMetrics(rw http.ResponseWriter, reques
 			http.Error(rw, "encode: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+		return
 	}
 
 	var metricsValue string
