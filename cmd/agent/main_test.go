@@ -18,7 +18,7 @@ func TestAgent_SendMetrics(t *testing.T) {
 		{
 			name: "positive test",
 			fields: fields{
-				metricStorage: store.NewMemStorage(),
+				metricStorage: store.NewMemStorage(0),
 			},
 			wantErr: true,
 		},

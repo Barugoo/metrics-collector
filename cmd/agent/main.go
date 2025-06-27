@@ -250,7 +250,7 @@ func (agent *Agent) MainLoop() error {
 
 func main() {
 	agent := Agent{
-		metricStorage: store.NewMemStorage(),
+		metricStorage: store.NewMemStorage(0),
 	}
 	agentFlags := flag.NewFlagSet("Agent flags", flag.ExitOnError)
 	agentFlags.StringVar(&agent.config.serverAddress, "a", "localhost:8080", "adress for start server in form ip:port. default localhost:8080")

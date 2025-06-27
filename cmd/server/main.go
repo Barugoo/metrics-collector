@@ -204,7 +204,7 @@ func (handler *MetricsHandler) requestLogger(h http.Handler) http.Handler {
 
 func MetricRouter() chi.Router {
 	handler := MetricsHandler{
-		metricsStorage: store.NewMemStorage(),
+		metricsStorage: store.NewMemStorage(ts),
 	}
 	handler.metricsStorage.InitializeStorage()
 
@@ -232,7 +232,10 @@ func MetricRouter() chi.Router {
 	return r
 }
 
+var ts int64
+
 func main() {
+	ts = time.Now().Unix()
 
 	serverFlags := flag.NewFlagSet("Start flags", flag.ExitOnError)
 	startAdress := serverFlags.String("a", "localhost:8080", "adress for start server")
