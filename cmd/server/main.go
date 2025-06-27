@@ -137,20 +137,8 @@ func (handler *MetricsHandler) getJSONMetrics(rw http.ResponseWriter, request *h
 		return
 	}
 
-	resp, err := json.Marshal(response)
-	if err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-	rw.Write(resp)
-	// rw.Header().Set("Content-Type", "application/json")
-	// rw.WriteHeader(http.StatusOK)
-	// if err := json.NewEncoder(rw).Encode(response); err != nil {
-	// 	http.Error(rw, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
+	json.NewEncoder(rw).Encode(response)
 }
 
 func (handler *MetricsHandler) metricsInfoHandler(rw http.ResponseWriter, request *http.Request) {
