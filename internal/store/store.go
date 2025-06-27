@@ -79,11 +79,19 @@ func (inMemmory *MemStorage) GetMetrics(metricsName string) (models.Metrics, err
 
 }
 
+func Safe[T any](v *T) T {
+	if v == nil {
+		var zero T
+		return zero
+	}
+	return *v
+}
+
 func (inMemmory *MemStorage) UpdateMetrics(metricsName string, metricsValue models.Metrics) error {
 	inMemmory.mu.Lock()
 	defer inMemmory.mu.Unlock()
 
-	log.Println(metricsValue)
+	log.Println(Safe(metricsValue.Delta), Safe(metricsValue.Value))
 
 	_, ok := inMemmory.storage[metricsName]
 	if !ok {
